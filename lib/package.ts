@@ -17,7 +17,6 @@ async function main(): Promise<void> {
 	await copy(makePath("../src/action.yml"), makePath("../dist/action.yml"));
 	await copy(makePath("../README.md"), makePath("../dist/README.md"));
 	await copy(makePath("../LICENSE"), makePath("../dist/LICENSE"));
-	await copy(makePath("../LICENSE"), makePath("../dist/LICENSE"));
 	await copy(makePath("../.dependabot"), makePath("../dist/.dependabot"));
 	await copy(makePath("../.github"), makePath("../dist/.github"));
 }

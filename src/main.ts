@@ -6,14 +6,16 @@ import { ensureDir, pathExists } from "fs-extra";
 import { getInput, setFailed, setOutput } from "@actions/core";
 
 import { HttpClient } from "typed-rest-client/HttpClient";
-import JSZip from "jszip";
-import { client } from "./client";
 import { env } from "process";
 import { extract } from "tar-stream";
 import gunzip from "gunzip-maybe";
 import { inspect } from "util";
 import { join } from "path";
+import { loadAsync } from "jszip";
+import { makeClient } from "./client";
 import { parseURL } from "whatwg-url";
+
+const client = makeClient();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function log(obj: any) {
@@ -94,7 +96,7 @@ type PackageJson = Record<string, unknown>;
 
 async function getPackages(filePath: string) {
 	const data = await promises.readFile(filePath);
-	const zip = await JSZip.loadAsync(data);
+	const zip = await loadAsync(data);
 	return Promise.all(
 		zip
 			.folder("js")

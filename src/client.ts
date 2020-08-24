@@ -1,13 +1,12 @@
-import "cross-fetch/polyfill";
-
 import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
 
 import { ApolloClient } from "apollo-client";
 import { HttpLink } from "apollo-link-http";
 import { env } from "process";
+import fetch from "cross-fetch";
 import { getInput } from "@actions/core";
 
-function makeClient(): ApolloClient<NormalizedCacheObject> {
+export function makeClient(): ApolloClient<NormalizedCacheObject> {
 	const token = env.GITHUB_TOKEN ?? getInput("token", { required: true });
 
 	if (!token) {
@@ -22,9 +21,8 @@ function makeClient(): ApolloClient<NormalizedCacheObject> {
 			headers: {
 				authorization: `token ${token}`,
 			},
+			fetch
 		}),
 		cache: new InMemoryCache(),
 	});
 }
-
-export const client = makeClient();

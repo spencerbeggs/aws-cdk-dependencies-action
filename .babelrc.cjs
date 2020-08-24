@@ -4,7 +4,6 @@ module.exports = {
 		[
 			"@babel/preset-env",
 			{
-				"modules": process.env.APP_ENV === "jest" ? "commonjs" : false,
 				"targets": {
 					"node": true
 				}
@@ -17,7 +16,7 @@ module.exports = {
 		"@babel/proposal-object-rest-spread",
 		"@babel/plugin-proposal-optional-chaining",
 		"@babel/plugin-proposal-nullish-coalescing-operator",
-		"babel-plugin-lodash"
+		"lodash"
 	],
 	"comments": true,
 	"sourceType": "unambiguous"
