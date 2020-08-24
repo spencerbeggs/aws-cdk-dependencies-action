@@ -1,5 +1,5 @@
 import babel from "@rollup/plugin-babel";
-import builtins from "builtin-modules";
+import builtins from "builtin-modules/static";
 import commonjs from "@rollup/plugin-commonjs";
 import { join } from "path";
 import json from "@rollup/plugin-json";
@@ -12,11 +12,11 @@ import typescript from "@rollup/plugin-typescript";
 
 const { NODE_ENV = "development" } = process.env;
 const isProduction = NODE_ENV === "production";
-const extensions = [".js", ".jsx", ".ts", ".tsx"];
-
+const extensions = [".js", ".jsx", ".ts", ".tsx", ".cjs", ".mjs", ".node"];
 export default {
 	input: pkg.main,
-	output: [{ dir: "./dist", format: "cjs", sourcemap: true }],
+	output: { dir: "./dist", format: "cjs", sourcemap: true},
+	//external: [...builtins],
 	external: [...builtins, ...Object.keys(!isProduction ? pkg.dependencies || {} : {})],
 	watch: {
 		include: "src/**",
@@ -49,11 +49,13 @@ export default {
 		}),
 		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
 		resolve({
-			rootDir: join(process.cwd(), ".."),
+			rootDir: join(process.cwd(), "../dist"),
+			mainFields: ["main"],
 			preferBuiltins: true,
 		}),
 		commonjs({
-			dynamicRequireTargets: ["node_modules/encoding/lib/*.js"],
+			extensions,
+			//ynamicRequireTargets: ["node_modules/encoding/lib/*.js"],
 		}),
 		isProduction && terser(),
 	],
