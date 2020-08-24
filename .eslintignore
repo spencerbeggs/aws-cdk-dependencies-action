@@ -1,0 +1,8 @@
+node_modules
+<<<<<<< HEAD
+dist
+=======
+dist
+src/generated
+.cache
+>>>>>>> 0.0.1

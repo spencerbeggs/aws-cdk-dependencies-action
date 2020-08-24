@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Test Modules",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceRoot}/dist/index.js",
+			"envFile": "${workspaceRoot}/.env",
+			"outputCapture": "console",
+			"internalConsoleOptions": "openOnSessionStart"
+		}
+	]
+}
