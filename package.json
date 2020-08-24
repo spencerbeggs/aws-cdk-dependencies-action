@@ -1,0 +1,27 @@
+{
+	"name": "aws-cdk-get-release-action",
+	"version": "0.0.0",
+	"description": "GitHub Action that retrieves the Node.js packages from an AWS CDK release by tag",
+	"main": "index.js",
+	"author": "C. Spencer Beggs <spencer@beg.gs>",
+	"repository": {
+		"url": "https://github.com/spencerbeggs/aws-cdk-get-release-action.git",
+		"type": "git"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@actions/core": "^1.2.4",
+		"@actions/github": "^4.0.0",
+		"@octokit/graphql": "^4.5.4",
+		"apollo-cache-inmemory": "^1.6.6",
+		"apollo-client": "^2.6.10",
+		"apollo-link-http": "^1.5.17",
+		"cross-fetch": "^3.0.5",
+		"gunzip-maybe": "^1.4.2",
+		"iconv": "^3.0.0",
+		"jszip": "^3.5.0",
+		"semver": "^7.3.2",
+		"tar-stream": "^2.1.3",
+		"typed-rest-client": "^1.7.3"
+	}
+}
