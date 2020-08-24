@@ -1,0 +1,10 @@
+*.d.ts
+node_modules
+dist 
+.DS_Store
+.env
+yarn-error.log
+.cache
+.secrets
+tmp
+archive
