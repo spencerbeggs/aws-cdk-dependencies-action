@@ -1,0 +1,13 @@
+{
+	"schema": {
+		"files": "schemas/**/*.gql"
+	},
+	"query": {
+		"files": [
+			{
+				"match": ["src/**/*.ts", "src/**/*.tsx"], // match multiple extensions
+				"parser": ["EmbeddedQueryParser", { "startTag": "gql`", "endTag": "`" }]
+			}
+		]
+	}
+}
