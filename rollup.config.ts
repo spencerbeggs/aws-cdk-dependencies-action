@@ -17,7 +17,7 @@ const extensions = [".js", ".jsx", ".ts", ".tsx"];
 export default {
 	input: pkg.main,
 	output: [{ dir: "./dist", format: "cjs", sourcemap: true }],
-	external: [...builtins, ...Object.keys(pkg.dependencies || {})],
+	external: [...builtins, ...Object.keys(!isProduction ? pkg.dependencies || {} : {})],
 	watch: {
 		include: "src/**",
 	},
