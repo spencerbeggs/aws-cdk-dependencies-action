@@ -17,6 +17,7 @@ async function main(): Promise<void> {
 	await copy(makePath("../.gitignore"), makePath("../dist/.gitignore"));
 	await copy(makePath("../yarn.lock"), makePath("../dist/yarn.lock"));
 	await copy(makePath("../src/action.yml"), makePath("../dist/action.yml"));
+	await copy(makePath("../src/Dockerfile"), makePath("../dist/Dockerfile"));
 	await copy(makePath("../README.md"), makePath("../dist/README.md"));
 	await copy(makePath("../LICENSE"), makePath("../dist/LICENSE"));
 	await copy(makePath("../.dependabot"), makePath("../dist/.dependabot"));
