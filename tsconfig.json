@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES2020",
-		"module": "ESNext",
+		"module": "CommonJS",
 		"moduleResolution": "node",
 		"lib": ["ESNext"],
 		"esModuleInterop": true,
@@ -16,12 +16,12 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": false,
 		"allowJs": true,
-		"sourceMap": true,
-		"inlineSources": true,
-		"experimentalDecorators": true,
 		"strictPropertyInitialization": false,
 		"pretty": false,
 		"resolveJsonModule": true
+	},
+	"typeAcquisition": {
+		"enable": true
 	},
 	"exclude": ["node_modules", "dist", ".cache", ".vscode", ".github", ".dependabot"]
 }

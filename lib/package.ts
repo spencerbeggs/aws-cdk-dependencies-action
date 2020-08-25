@@ -6,9 +6,11 @@ const makePath = (str: string): string => resolve(__dirname, str);
 
 async function main(): Promise<void> {
 	const pkg = await readJson(resolve(__dirname, "../package.json"));
-	delete pkg.devDependencies;
 	delete pkg.scripts;
-	pkg.main = pkg.main.replace("src/", "").replace(".ts", ".js");
+	delete pkg.dependencies;
+	delete pkg.devDependencies;
+	delete pkg.peerDependencies;
+	pkg.module = pkg.module.replace("src/", "").replace(".ts", ".js");
 	// TODO: Restore when typescript plugins is fixed
 	//pkg.types = pkg.main.replace(".js", ".d.ts");
 	await writeJson(makePath("../dist/package.json"), pkg, { spaces: "\t" });

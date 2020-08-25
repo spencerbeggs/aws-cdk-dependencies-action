@@ -14,12 +14,14 @@ const { NODE_ENV = "development" } = process.env;
 const isProduction = NODE_ENV === "production";
 const extensions = [".js", ".jsx", ".ts", ".tsx", ".cjs", ".mjs", ".node"];
 export default {
-	input: pkg.main,
-	output: { dir: "./dist", format: "cjs", sourcemap: true},
-	//external: [...builtins],
+	input: pkg.module,
+	output: { dir: "./dist", format: "esm", sourcemap: !isProduction},
 	external: [...builtins, ...Object.keys(!isProduction ? pkg.dependencies || {} : {})],
 	watch: {
 		include: "src/**",
+	},
+	treeshake: {
+		moduleSideEffects: "no-external",
 	},
 	plugins: [
 		isProduction &&
@@ -43,20 +45,21 @@ export default {
 		replace({
 			"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
 		}),
-		json(),
 		typescript({
-			sourceMap: true,
+			sourceMap: !isProduction,
 		}),
 		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
 		resolve({
 			rootDir: join(process.cwd(), "../dist"),
-			mainFields: ["main"],
+			mainFields: ["module"],
 			preferBuiltins: true,
 		}),
 		commonjs({
 			extensions,
-			//ynamicRequireTargets: ["node_modules/encoding/lib/*.js"],
+			dynamicRequireTargets: ["node_modules/encoding/lib/*.js", "node_modules/readable-stream/lib/**/*.js"],
+			transformMixedEsModules: false
 		}),
+		json(),
 		isProduction && terser(),
 	],
 };
