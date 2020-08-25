@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { jsWithBabel: tsjPreset } = require("ts-jest/presets");
-const babelConfig = require("./.babelrc.cjs");
+import babelConfig from "./.babel.config.js";
+import { jsWithBabel as tsjPreset } from "ts-jest/presets";
 
-module.exports = {
+export default {
 	preset: "ts-jest/presets/js-with-ts",
 	testEnvironment: "node",
 	globals: {
