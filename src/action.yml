@@ -1,5 +1,8 @@
-name: Get AWS CDK Release
-description: GitHub Action that retrieves the Node.js packages from an AWS CDK release by tag
+name: Get AWS CDK Dependencies
+description: Retrieves the Node.js packages from an AWS CDK release by tag
+branding:
+  icon: package
+  color: purple
 inputs:
   token:
     description: "Your GitHub token"
@@ -7,9 +10,6 @@ inputs:
   release:
     description: "The release of the AWS CDK release you woulld like to retreive, eg, v1.54.0"
     required: true
-outputs:
-  time:
-    description: "The time we greeted you"
 runs:
-  using: "node12"
-  main: "index.js"
+  using: "docker"
+  image: "Dockerfile"
