@@ -6,10 +6,28 @@
 			"request": "launch",
 			"name": "Test Modules",
 			"skipFiles": ["<node_internals>/**"],
-			"program": "${workspaceRoot}/dist/index.js",
+			"program": "${workspaceRoot}/dist/index.mjs",
 			"envFile": "${workspaceRoot}/.env",
 			"outputCapture": "console",
 			"internalConsoleOptions": "openOnSessionStart"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Docker debug",
+			"program": "docker-debug",
+			"cwd": "${workspaceRoot}",
+			"trace": "all",
+			"runtimeExecutable": "yarn"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Codegen",
+			"program": "codegen",
+			"cwd": "${workspaceRoot}",
+			"trace": "all",
+			"runtimeExecutable": "yarn"
 		}
 	]
 }

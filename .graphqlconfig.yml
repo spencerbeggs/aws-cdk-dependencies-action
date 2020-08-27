@@ -1,6 +1,0 @@
-projects:
-  prod:
-    schemaPath: schema/schema.graphql
-    extensions:
-      endpoints:
-        default: https://prod.my-graphql-api.com/graphql
