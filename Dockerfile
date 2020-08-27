@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:slim-14.8.0
+FROM mhart/alpine-node:14.8.0
 WORKDIR /app
 COPY package.json yarn.lock index.js ./
 ENV NODE_ENV production
