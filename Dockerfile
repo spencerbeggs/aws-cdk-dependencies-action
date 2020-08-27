@@ -1,5 +1,6 @@
 FROM mhart/alpine-node:slim-14.8.0
 WORKDIR /app
-COPY index.js ./
+COPY package.json yarn.lock index.js ./
 ENV NODE_ENV production
-CMD [ "node", "index.js" ]
+RUN yarn install --production=true --frozen-lockfile
+CMD [ "node", "index.mjs" ]
