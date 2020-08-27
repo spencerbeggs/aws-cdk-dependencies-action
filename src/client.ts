@@ -1,13 +1,10 @@
-import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
+import { ApolloClient, InMemoryCache, NormalizedCacheObject, createHttpLink } from "@apollo/client/core";
 
-import { ApolloClient } from "apollo-client";
-import { HttpLink } from "apollo-link-http";
-import { env } from "process";
 import fetch from "cross-fetch";
 import { getInput } from "@actions/core";
 
 export function makeClient(): ApolloClient<NormalizedCacheObject> {
-	const token = env.GITHUB_TOKEN ?? getInput("token", { required: true });
+	const token = process.env.GITHUB_TOKEN ?? getInput("token", { required: true });
 
 	if (!token) {
 		throw new Error(
@@ -15,14 +12,17 @@ export function makeClient(): ApolloClient<NormalizedCacheObject> {
 		);
 	}
 
-	return new ApolloClient({
-		link: new HttpLink({
-			uri: "https://api.github.com/graphql",
-			headers: {
-				authorization: `token ${token}`,
-			},
-			fetch
-		}),
+	const link = createHttpLink({
+		uri: "https://api.github.com/graphql",
+		headers: {
+			authorization: `token ${token}`,
+		},
+		fetch,
+	});
+
+	const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
+		link,
 		cache: new InMemoryCache(),
 	});
+	return client;
 }

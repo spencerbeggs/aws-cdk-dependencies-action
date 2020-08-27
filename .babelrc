@@ -1,0 +1,5 @@
+{
+	"presets": [["@babel/preset-typescript", { "allowNamespaces": false }]],
+	"plugins": ["macros", "@babel/proposal-class-properties", "lodash"],
+	"comments": false
+}

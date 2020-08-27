@@ -1,11 +1,12 @@
-import { CdkReleaseAssets, CdkReleaseAssetsQuery, CdkReleaseAssetsQueryVariables, ReleaseAsset } from "./generated/graphql";
+import { GetReleaseAssets, GetReleaseAssetsVariables } from "./generated/GetReleaseAssets";
 import { ParsedUrlQuery, parse as parseQuery } from "querystring";
 import { clean, gt, intersects, minVersion } from "semver";
 import { createWriteStream, promises } from "fs";
 import { ensureDir, pathExists } from "fs-extra";
 import { getInput, setFailed, setOutput } from "@actions/core";
 
-import { HttpClient } from "typed-rest-client/HttpClient";
+import { GET_CDK_RELEASE_ASSETS } from "./queries";
+import { RestClient } from "typed-rest-client";
 import { env } from "process";
 import { extract } from "tar-stream";
 import gunzip from "gunzip-maybe";
@@ -37,13 +38,13 @@ function debug(obj: any): void {
 
 async function getReleaseDownloadUrl(tagName: string): Promise<string> {
 	const version = clean(tagName);
-	const result = await client.query<CdkReleaseAssetsQuery, CdkReleaseAssetsQueryVariables>({
-		query: CdkReleaseAssets,
+	const result = await client.query<GetReleaseAssets, GetReleaseAssetsVariables>({
+		query: GET_CDK_RELEASE_ASSETS,
 		variables: {
 			tagName,
 		},
 	});
-	const assets = result.data.repository.release.releaseAssets.edges.map((edge) => edge.node as ReleaseAsset);
+	const assets = result.data.repository.release.releaseAssets.edges.map((edge) => edge.node);
 	return assets.reduce((acc: string, asset): string => {
 		if (asset.name === `aws-cdk-${version}.zip`) {
 			acc = asset.url;
@@ -82,10 +83,11 @@ async function download(url) {
 	if (await pathExists(filePath)) {
 		return filePath;
 	}
-	return new Promise<string>(async (resolve) => {
-		const client = new HttpClient("download");
-		const stream: NodeJS.WritableStream = createWriteStream(filePath);
-		(await client.get(url)).message.pipe(stream).on("close", () => {
+	const rest = new RestClient("download");
+	const stream: NodeJS.WritableStream = createWriteStream(filePath);
+	const { message } = await rest.client.get(url);
+	return new Promise<string>((resolve) => {
+		message.pipe(stream).on("close", () => {
 			stream.end();
 			resolve(filePath);
 		});
@@ -106,8 +108,7 @@ async function getPackages(filePath: string) {
 			.map((file) => {
 				return new Promise<PackageJson[]>((resolve) => {
 					const pkgs: PackageJson[] = [];
-					file
-						.nodeStream()
+					file.nodeStream()
 						.pipe(gunzip())
 						.pipe(extract())
 						.on("entry", function (header, stream, next) {

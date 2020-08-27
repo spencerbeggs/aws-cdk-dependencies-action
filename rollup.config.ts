@@ -15,8 +15,12 @@ const isProduction = NODE_ENV === "production";
 const extensions = [".js", ".jsx", ".ts", ".tsx", ".cjs", ".mjs", ".node"];
 export default {
 	input: pkg.module,
-	output: { dir: "./dist", format: "esm", sourcemap: !isProduction},
-	external: [...builtins, ...Object.keys(!isProduction ? pkg.dependencies || {} : {})],
+	output: {
+		file: "./dist/index.mjs",
+		format: "esm",
+		sourcemap: !isProduction,
+	},
+	external: [...builtins, ...Object.keys(pkg.dependencies || {})],
 	watch: {
 		include: "src/**",
 	},
@@ -24,6 +28,31 @@ export default {
 		moduleSideEffects: "no-external",
 	},
 	plugins: [
+		isProduction &&
+			replace({
+				"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+				"process.env.GITHUB_TOKEN": undefined,
+				"process.env.RELEASE": undefined,
+				"process.env.APP_ENV": undefined,
+			}),
+		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
+		typescript({
+			target: "ES2020",
+			module: "CommonJS",
+			preserveConstEnums: false,
+			sourceMap: !isProduction,
+		}),
+		resolve({
+			rootDir: join(process.cwd(), "../dist"),
+			mainFields: ["module"],
+			preferBuiltins: true,
+		}),
+		commonjs({
+			extensions,
+			transformMixedEsModules: false,
+		}),
+		json(),
+		isProduction && terser(),
 		isProduction &&
 			license({
 				sourcemap: true,
@@ -42,24 +71,5 @@ export default {
 					},
 				},
 			}),
-		replace({
-			"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-		}),
-		typescript({
-			sourceMap: !isProduction,
-		}),
-		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
-		resolve({
-			rootDir: join(process.cwd(), "../dist"),
-			mainFields: ["module"],
-			preferBuiltins: true,
-		}),
-		commonjs({
-			extensions,
-			dynamicRequireTargets: ["node_modules/encoding/lib/*.js", "node_modules/readable-stream/lib/**/*.js"],
-			transformMixedEsModules: false
-		}),
-		json(),
-		isProduction && terser(),
 	],
 };

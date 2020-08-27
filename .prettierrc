@@ -1,11 +1,15 @@
 {
 	"useTabs": true,
-	"tabWidth": 2,
+	"tabWidth": 4,
 	"trailingComma": "all",
 	"printWidth": 125,
 	"overrides": [
 		{
-			"files": [".prettierrc", ".eslintrc", ".babelrc", "package.json", ".gqlconfig", ".huskyrc", ".babel-plugin-macrosrc"],
+			"files": ".json",
+			"options": { "parser": "json" }
+		},
+		{
+			"files": [".prettierrc", ".eslintrc", ".babelrc", ".gqlconfig", ".huskyrc", ".babel-plugin-macrosrc"],
 			"options": { "parser": "json" }
 		}
 	]

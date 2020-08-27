@@ -5,6 +5,6 @@
 		"esbenp.prettier-vscode",
 		"amatiasq.sort-imports",
 		"DavidAnson.vscode-markdownlint",
-		"kumar-harsh.graphql-for-vscode"
+		"apollographql.vscode-apollo"
 	]
 }

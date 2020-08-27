@@ -18,7 +18,7 @@
 		"allowJs": true,
 		"strictPropertyInitialization": false,
 		"pretty": false,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
 	},
 	"typeAcquisition": {
 		"enable": true
