@@ -1,42 +1,21 @@
-import { GetReleaseAssets, GetReleaseAssetsVariables } from "./generated/GetReleaseAssets";
-import { ParsedUrlQuery, parse as parseQuery } from "querystring";
-import { clean, gt, intersects, minVersion } from "semver";
+import { exportVariable, getInput, setFailed, setOutput } from "@actions/core";
 import { createWriteStream, promises } from "fs";
 import { ensureDir, pathExists } from "fs-extra";
-import { getInput, setFailed, setOutput } from "@actions/core";
-
-import { GET_CDK_RELEASE_ASSETS } from "./queries";
-import { RestClient } from "typed-rest-client";
-import { env } from "process";
-import { extract } from "tar-stream";
 import gunzip from "gunzip-maybe";
-import { inspect } from "util";
-import { join } from "path";
 import { loadAsync } from "jszip";
-import { makeClient } from "./client";
+import { join } from "path";
+import { parse as parseQuery, ParsedUrlQuery } from "querystring";
+import { clean, gt, intersects, minVersion } from "semver";
+import { extract } from "tar-stream";
+import { RestClient } from "typed-rest-client";
 import { parseURL } from "whatwg-url";
-
-const client = makeClient();
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function log(obj: any) {
-	console.log(inspect(obj, false, 7, true));
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debug(obj: any): void {
-	if (env.APP_ENV === "debug") {
-		if (Array.isArray(obj)) {
-			obj.forEach((item) => log(item));
-		} else if (obj !== null && typeof obj === "object") {
-			log(obj);
-		} else if (typeof obj === "string") {
-			console.log(obj);
-		}
-	}
-}
+import { client } from "./client";
+import { GetReleaseAssets, GetReleaseAssetsVariables } from "./generated/GetReleaseAssets";
+import { debug, log } from "./logger";
+import { GET_CDK_RELEASE_ASSETS } from "./queries";
 
 async function getReleaseDownloadUrl(tagName: string): Promise<string> {
+	debug(`getting download url for AWS CDK relase: ${tagName}`);
 	const version = clean(tagName);
 	const result = await client.query<GetReleaseAssets, GetReleaseAssetsVariables>({
 		query: GET_CDK_RELEASE_ASSETS,
@@ -44,6 +23,7 @@ async function getReleaseDownloadUrl(tagName: string): Promise<string> {
 			tagName,
 		},
 	});
+
 	const assets = result.data.repository.release.releaseAssets.edges.map((edge) => edge.node);
 	return assets.reduce((acc: string, asset): string => {
 		if (asset.name === `aws-cdk-${version}.zip`) {
@@ -76,11 +56,13 @@ function getFilename(url: string): string {
 }
 
 async function download(url) {
+	debug(`downloading: ${url}`);
 	const filename = getFilename(url);
 	const dirPath = join(process.cwd(), "tmp");
 	const filePath = join(process.cwd(), `tmp/${filename}`);
 	await ensureDir(dirPath);
 	if (await pathExists(filePath)) {
+		debug(`source file already downloaded: ${filePath}`);
 		return filePath;
 	}
 	const rest = new RestClient("download");
@@ -89,6 +71,7 @@ async function download(url) {
 	return new Promise<string>((resolve) => {
 		message.pipe(stream).on("close", () => {
 			stream.end();
+			debug(`downloaded source to: ${filePath}`);
 			resolve(filePath);
 		});
 	});
@@ -97,6 +80,7 @@ async function download(url) {
 type PackageJson = Record<string, unknown>;
 
 async function getPackages(filePath: string) {
+	debug(`parsing packages from: ${filePath}`);
 	const data = await promises.readFile(filePath);
 	const zip = await loadAsync(data);
 	return Promise.all(
@@ -125,11 +109,11 @@ async function getPackages(filePath: string) {
 											const pkg = JSON.parse(json);
 											pkgs.push(pkg);
 										} catch (err) {
-											console.log(err);
+											debug(err);
 										}
 									})
 									.on("error", (err) => {
-										console.log(err);
+										debug(err);
 									});
 							}
 							stream.resume();
@@ -138,7 +122,9 @@ async function getPackages(filePath: string) {
 				});
 			}),
 	).then((arr) => {
-		return Promise.resolve([].concat([], ...arr).filter((item) => Boolean(item)));
+		const packages = [].concat([], ...arr).filter((item) => Boolean(item));
+		debug(`parsed ${Object.values(packages).length} packages`);
+		return Promise.resolve(packages);
 	});
 }
 
@@ -153,7 +139,7 @@ function normalizeVersions(pkg: string, v1: string, v2: string): string {
 
 export async function main(): Promise<void> {
 	try {
-		const tagName = env.RELEASE ?? getInput("release");
+		const tagName = process.env.RELEASE ?? getInput("release");
 		const url = await getReleaseDownloadUrl(tagName);
 		const source = await download(url);
 		const packages = await getPackages(source);
@@ -177,11 +163,14 @@ export async function main(): Promise<void> {
 			},
 			{ stable: [], experimental: [], deprecated: [], unknown: [] },
 		);
-		debug(`stable packages: ${stable.length}`);
-		debug(`experimental packages: ${experimental.length}`);
-		debug(`deprecated packages: ${deprecated.length}`);
-		debug(`unknown packages: ${unknown.length}`);
-		const output = [stable, experimental].flat().reduce((acc, { name, version, peerDependencies = {} }) => {
+		debug(`  — stable: ${stable.length}`);
+		debug(`  — experimental: ${experimental.length}`);
+		debug(`  — deprecated: ${deprecated.length}`);
+		debug(`  — unknown: ${unknown.length}`);
+		const output = [stable, experimental].flat().reduce((acc, { name, version, peerDependencies = {} }): Record<
+			string,
+			string
+		> => {
 			const current = acc[name];
 			if (current && current !== version) {
 				version = normalizeVersions(name, current, version);
@@ -197,14 +186,11 @@ export async function main(): Promise<void> {
 			acc = Object.fromEntries(Object.entries(acc).sort());
 			return acc;
 		}, {});
-		if (env.APP_ENV === "debug") {
-			debug(output);
-			process.exit(0);
-		} else {
-			setOutput("dependencies", JSON.stringify(output));
-		}
+		debug(output);
+		setOutput("dependencies", output);
+		exportVariable("dependencies", output);
 	} catch (err) {
-		console.log(err);
+		log(err);
 		setFailed(`Action failed with error ${err}`);
 	}
 }

@@ -1,17 +1,262 @@
 {
 	"version": "2.0.0",
+	"presentation": {
+		"showReuseMessage": true,
+		"clear": true
+	},
 	"tasks": [
 		{
-			"type": "typescript",
-			"tsconfig": "tsconfig.debug.json",
-			"problemMatcher": ["$tsc"],
-			"group": "build",
-				"label": "tsc: build - tsconfig.debug.json"
+			"label": "docker:container:stop",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"ps",  "-q", "--filter", "ancestor=\"aws-cdk-dependencies-action\"", "|", "xargs", "docker", "stop",
+			],
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
 		},
 		{
+			"label": "docker:container:remove",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"ps",  "-q", "--filter",  "ancestor=\"aws-cdk-dependencies-action\"", "|", "xargs", "docker", "rm",
+			],
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "npm:github-schema",
 			"type": "npm",
-			"script": "build",
-			"group": "build"
+			"script": "apollo client:download-schema --config=apollo.config.js vendor/github.graphql",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "npm:codegen",
+			"type": "npm",
+			"script": "apollo client:codegen --config=apollo.config.js --target=typescript generated",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "npm:clean",
+			"type": "shell",
+			"command": "rm",
+			"args": [
+				"-rf",
+				"dist"
+			],
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "npm:rollup",
+			"type": "npm",
+			"script": "rollup",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "npm:package",
+			"type": "npm",
+			"script": "ts-node lib/package.ts",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "docker:image:run",
+			"type": "docker-build",
+			"dockerBuild": {
+				"tag": "spencerbeggs/aws-cdk-dependencies-action:run",
+				"target": "run",
+				"context": "${workspaceRoot}/dist",
+				"dockerfile": "${workspaceRoot}/dist/Dockerfile",
+				"pull": true,
+				"labels": {
+					"includeDefaults": false
+				}
+			},
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "docker:image:debug",
+			"type": "docker-build",
+			"dockerBuild": {
+				"tag": "spencerbeggs/aws-cdk-dependencies-action:debug",
+				"target": "debug",
+				"context": "${workspaceRoot}/dist",
+				"dockerfile": "${workspaceRoot}/dist/Dockerfile",
+				"pull": true,
+				"labels": {
+					"includeDefaults": false
+				}
+			},
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "docker:container:run",
+			"type": "docker-run",
+			"isBackground": true,
+			"dockerRun": {
+				"containerName": "aws-cdk-dependencies-action",
+				"image": "spencerbeggs/aws-cdk-dependencies-action:run",
+				"envFiles": [
+					"${workspaceRoot}/.env.test"
+				],
+				"ports": [
+					{
+						"containerPort": 9229,
+						"hostPort": 9229
+					}
+				],
+				"volumes": [{
+					"localPath": "${workspaceRoot}/tmp",
+					"containerPath": "/tmp",
+					"permissions": "rw"
+				}],
+				"labels": {
+					"includeDefaults": false
+				}
+			},
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "docker:container:debug",
+			"type": "docker-run",
+			"isBackground": true,
+			"dockerRun": {
+				"containerName": "aws-cdk-dependencies-action",
+				"image": "spencerbeggs/aws-cdk-dependencies-action:debug",
+				"envFiles": [
+					"${workspaceRoot}/.env.test"
+				],
+				"portsPublishAll": true,
+				"ports": [
+					{
+						"containerPort": 9229,
+						"hostPort": 9229
+					}
+				],
+				"volumes": [{
+					"localPath": "${workspaceRoot}/tmp",
+					"containerPath": "/tmp",
+					"permissions": "rw"
+				}],
+				"labels": {
+					"includeDefaults": false
+				}
+			},
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": false,
+				"group": "build"
+			}
+		},
+		{
+			"label": "container:bootstrap",
+			"dependsOn": [
+				"npm:clean",
+				"npm:github-schema",
+				"npm:codegen",
+				"npm:rollup",
+				"npm:package",
+				"docker:container:stop",
+				"docker:container:remove",
+				"docker:image:run",
+				"docker:container:run"
+			],
+			"dependsOrder": "sequence",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": true,
+				"group": "build"
+			}
+		},
+		{
+			"label": "container:debug",
+			"dependsOn": [
+				"npm:clean",
+				"npm:github-schema",
+				"npm:codegen",
+				"npm:rollup",
+				"npm:package",
+				"docker:container:stop",
+				"docker:container:remove",
+				"docker:image:debug",
+				"docker:container:debug"
+			],
+			"dependsOrder": "sequence",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": true,
+				"group": "build"
+			}
+		},
+		{
+			"label": "container:reboot",
+			"dependsOn": [
+				"npm:clean",
+				"npm:rollup",
+				"npm:package",
+				"docker:container:stop",
+				"docker:container:remove",
+				"docker:image:run",
+				"docker:container:run"
+			],
+			"dependsOrder": "sequence",
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false,
+				"clear": true,
+				"group": "build"
+			}
 		}
 	]
 }

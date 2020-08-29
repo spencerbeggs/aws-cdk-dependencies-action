@@ -1,33 +1,42 @@
 {
 	"version": "0.2.0",
-	"configurations": [
-		{
+	"configurations": [{
+			"name": "test action in watch mode",
 			"type": "node",
 			"request": "launch",
-			"name": "Test Modules",
 			"skipFiles": ["<node_internals>/**"],
+			"env": {
+				"NODE_ENV": "development"
+			},
 			"program": "${workspaceRoot}/dist/index.mjs",
 			"envFile": "${workspaceRoot}/.env",
 			"outputCapture": "console",
 			"internalConsoleOptions": "openOnSessionStart"
 		},
 		{
-			"type": "node",
+			"name": "container:bootstrap",
+			"type": "docker",
 			"request": "launch",
-			"name": "Docker debug",
-			"program": "docker-debug",
-			"cwd": "${workspaceRoot}",
-			"trace": "all",
-			"runtimeExecutable": "yarn"
+			"containerName": "aws-cdk-dependencies-action",
+			"preLaunchTask": "container:bootstrap",
+			"platform": "node",
 		},
 		{
-			"type": "node",
+			"name": "container:debug",
+			"type": "docker",
 			"request": "launch",
-			"name": "Codegen",
-			"program": "codegen",
-			"cwd": "${workspaceRoot}",
-			"trace": "all",
-			"runtimeExecutable": "yarn"
+			"containerName": "aws-cdk-dependencies-action",
+			"preLaunchTask": "container:debug",
+			"platform": "node",
+			"removeContainerAfterDebug": true
+		},
+		{
+			"name": "container:reboot",
+			"type": "docker",
+			"request": "launch",
+			"containerName": "aws-cdk-dependencies-action",
+			"preLaunchTask": "container:reboot",
+			"platform": "node"
 		}
 	]
 }
