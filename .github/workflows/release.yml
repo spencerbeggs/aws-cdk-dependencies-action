@@ -51,8 +51,8 @@ jobs:
           git config --global push.followTags true
           git config user.name "GitHub Actions"
           git config user.email "actions@users.noreply.github.com"
-          git mv dist /temp/dist
-          rsync --delete -var --include=".*"  /temp/dist/ ./
+          git mv dist /tmp/dist
+          rsync --delete -var --include=".*"  /tmp/dist/ ./
           git add .
           git commit -m "merge changes from ${{ steps.meta.outputs.version }}"
           git tag -m "AWS CDK ${{ steps.meta.outputs.version }}" ${{ steps.meta.outputs.version }}
