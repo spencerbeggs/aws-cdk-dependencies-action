@@ -20,7 +20,7 @@ export default {
 		format: "esm",
 		sourcemap: !isProduction,
 	},
-	external: [...builtins, ...Object.keys(pkg.dependencies || {})],
+	external: [...builtins, "@apollo/client/core", ...Object.keys(pkg.dependencies || {})],
 	watch: {
 		include: "src/**",
 	},
@@ -31,14 +31,14 @@ export default {
 		isProduction &&
 			replace({
 				"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-				"process.env.GITHUB_TOKEN": undefined,
-				"process.env.RELEASE": undefined,
-				"process.env.DEBUG": undefined,
+				"process.env.GITHUB_TOKEN": null,
+				"process.env.RELEASE": null,
+				"process.env.DEBUG": null,
 			}),
 		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
 		typescript({
 			target: "ES2020",
-			module: "CommonJS",
+			module: "ESNext",
 			preserveConstEnums: false,
 			sourceMap: !isProduction,
 		}),

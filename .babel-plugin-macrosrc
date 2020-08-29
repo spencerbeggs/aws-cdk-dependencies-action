@@ -1,4 +1,7 @@
 {
+	"graphql-tag": {
+		"production": true
+	},
 	"remove-console": {
 		"production": true,
 		"staging": { "exclude": ["error"] }
