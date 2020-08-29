@@ -1,14 +1,14 @@
 import babel from "@rollup/plugin-babel";
-import builtins from "builtin-modules/static";
 import commonjs from "@rollup/plugin-commonjs";
-import { join } from "path";
 import json from "@rollup/plugin-json";
-import license from "rollup-plugin-license";
-import pkg from "./package.json";
-import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
-import { terser } from "rollup-plugin-terser";
+import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
+import builtins from "builtin-modules/static";
+import { join } from "path";
+import license from "rollup-plugin-license";
+import { terser } from "rollup-plugin-terser";
+import pkg from "./package.json";
 
 const { NODE_ENV = "development" } = process.env;
 const isProduction = NODE_ENV === "production";
@@ -33,7 +33,7 @@ export default {
 				"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
 				"process.env.GITHUB_TOKEN": undefined,
 				"process.env.RELEASE": undefined,
-				"process.env.APP_ENV": undefined,
+				"process.env.DEBUG": undefined,
 			}),
 		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
 		typescript({

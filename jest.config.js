@@ -1,5 +1,5 @@
-import babelConfig from "./.babel.config.js";
 import { jsWithBabel as tsjPreset } from "ts-jest/presets";
+import babelConfig from "./.babel.config.js";
 
 export default {
 	preset: "ts-jest/presets/js-with-ts",

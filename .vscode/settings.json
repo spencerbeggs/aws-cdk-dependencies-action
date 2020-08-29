@@ -17,15 +17,17 @@
 	},
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": true,
-		"source.fixAll.stylelint": true
+		"source.fixAll.stylelint": true,
+		"source.addMissingImports": true,
+		"source.organizeImports": true
 	},
 	"eslint.options": {
 		"configFile": ".eslintrc"
 	},
 	"npm.packageManager": "yarn",
-	"terminal.integrated.shellArgs.osx": [],
 	"stylelint.enable": false,
 	"typescript.referencesCodeLens.enabled": true,
-	"graphqlForVSCode.nodePath": "node_modules",
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"sort-imports.on-save": false,
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"aws.profile": "savvy"
 }
