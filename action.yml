@@ -8,8 +8,12 @@ inputs:
     description: "Your GitHub token"
     required: true
   release:
-    description: "The release of the AWS CDK release you woulld like to retreive, eg, v1.54.0"
+    description: "The AWS CDK release to parse, eg, v1.61.0"
     required: true
+  debug:
+    required: false
+    description: "Set to 'true' to get logging"
+    default: "false"
 runs:
   using: "docker"
   image: "Dockerfile"
