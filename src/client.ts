@@ -1,5 +1,5 @@
 import { getInput } from "@actions/core";
-import { ApolloClient, createHttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client/core";
+import { ApolloClient, createHttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
 import fetch from "cross-fetch";
 
 const token = process.env.GITHUB_TOKEN ?? getInput("token", { required: true });

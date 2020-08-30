@@ -29,5 +29,6 @@
 	"typescript.referencesCodeLens.enabled": true,
 	"sort-imports.on-save": false,
 	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.preferences.importModuleSpecifierEnding": ".js",
 	"aws.profile": "savvy"
 }

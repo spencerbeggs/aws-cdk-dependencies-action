@@ -19,8 +19,14 @@ export default {
 		file: "./dist/index.mjs",
 		format: "esm",
 		sourcemap: !isProduction,
+		exports: "default",
 	},
-	external: [...builtins, "@apollo/client/core", ...Object.keys(pkg.dependencies || {})],
+	external: [
+		...builtins,
+		"@apollo/client/core",
+		"@graphql-typed-document-node/core",
+		...Object.keys(pkg.dependencies || {}),
+	],
 	watch: {
 		include: "src/**",
 	},
@@ -28,31 +34,6 @@ export default {
 		moduleSideEffects: "no-external",
 	},
 	plugins: [
-		isProduction &&
-			replace({
-				"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-				"process.env.GITHUB_TOKEN": null,
-				"process.env.RELEASE": null,
-				"process.env.DEBUG": null,
-			}),
-		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
-		typescript({
-			target: "ES2020",
-			module: "ESNext",
-			preserveConstEnums: false,
-			sourceMap: !isProduction,
-		}),
-		resolve({
-			rootDir: join(process.cwd(), "../dist"),
-			mainFields: ["module"],
-			preferBuiltins: true,
-		}),
-		commonjs({
-			extensions,
-			transformMixedEsModules: false,
-		}),
-		json(),
-		isProduction && terser(),
 		isProduction &&
 			license({
 				sourcemap: true,
@@ -71,5 +52,29 @@ export default {
 					},
 				},
 			}),
+		isProduction &&
+			replace({
+				"process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+				"process.env.GITHUB_TOKEN": null,
+				"process.env.RELEASE": null,
+				"process.env.DEBUG": null,
+			}),
+		babel({ extensions, include: ["src/**/*"], babelHelpers: "bundled" }),
+		typescript({
+			target: "ES2020",
+			module: "CommonJS",
+			sourceMap: !isProduction,
+		}),
+		resolve({
+			rootDir: join(process.cwd(), "../dist"),
+			mainFields: ["module"],
+			preferBuiltins: true,
+		}),
+		commonjs({
+			extensions,
+			transformMixedEsModules: true,
+		}),
+		json(),
+		isProduction && terser(),
 	],
 };

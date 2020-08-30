@@ -1,4 +1,4 @@
-import { exportVariable, getInput, setFailed, setOutput } from "@actions/core";
+import { debug, exportVariable, getInput, group, info, setFailed, setOutput, warning } from "@actions/core";
 import { createWriteStream, promises } from "fs";
 import { ensureDir, pathExists } from "fs-extra";
 import gunzip from "gunzip-maybe";
@@ -10,28 +10,7 @@ import { extract } from "tar-stream";
 import { RestClient } from "typed-rest-client";
 import { parseURL } from "whatwg-url";
 import { client } from "./client";
-import { GetReleaseAssets, GetReleaseAssetsVariables } from "./generated/GetReleaseAssets";
-import { debug, log } from "./logger";
-import { GET_CDK_RELEASE_ASSETS } from "./queries";
-
-async function getReleaseDownloadUrl(tagName: string): Promise<string> {
-	debug(`getting download url for AWS CDK relase: ${tagName}`);
-	const version = clean(tagName);
-	const result = await client.query<GetReleaseAssets, GetReleaseAssetsVariables>({
-		query: GET_CDK_RELEASE_ASSETS,
-		variables: {
-			tagName,
-		},
-	});
-
-	const assets = result.data.repository.release.releaseAssets.edges.map((edge) => edge.node);
-	return assets.reduce((acc: string, asset): string => {
-		if (asset.name === `aws-cdk-${version}.zip`) {
-			acc = asset.url;
-		}
-		return acc;
-	}, null);
-}
+import { GetReleaseByTagDocument, GetReleaseByTagQuery } from "./generated";
 
 interface AssetQuery extends ParsedUrlQuery {
 	"X-Amz-Algorithm": string;
@@ -109,11 +88,11 @@ async function getPackages(filePath: string) {
 											const pkg = JSON.parse(json);
 											pkgs.push(pkg);
 										} catch (err) {
-											debug(err);
+											warning(err.message);
 										}
 									})
 									.on("error", (err) => {
-										debug(err);
+										warning(err.message);
 									});
 							}
 							stream.resume();
@@ -130,7 +109,7 @@ async function getPackages(filePath: string) {
 
 function normalizeVersions(pkg: string, v1: string, v2: string): string {
 	if (!intersects(v1, v2)) {
-		debug(`${pkg}@${v1} and ${pkg}@${v2} do not intersect`);
+		warning(`${pkg}@${v1} and ${pkg}@${v2} do not intersect`);
 	}
 	const { version: v1Min } = minVersion(v1);
 	const { version: v2Min } = minVersion(v2);
@@ -139,8 +118,30 @@ function normalizeVersions(pkg: string, v1: string, v2: string): string {
 
 export async function main(): Promise<void> {
 	try {
-		const tagName = process.env.RELEASE ?? getInput("release");
-		const url = await getReleaseDownloadUrl(tagName);
+		const release = process.env.RELEASE ?? getInput("release");
+		const version = clean(release);
+		const url = await group(
+			`Getting download URL for AWS CDK release ${release}`,
+			async (): Promise<string> => {
+				const {
+					data: { repository },
+				} = await client.query<GetReleaseByTagQuery>({
+					query: GetReleaseByTagDocument,
+					variables: {
+						tagName: release,
+					},
+				});
+				const assets = repository?.release?.releaseAssets?.edges.map((edge) => edge.node);
+				info(`found ${assets.length} assets:`);
+				assets.forEach(({ name }) => info(`   — ${name}`));
+				return assets.reduce((acc: string, asset): string => {
+					if (asset.name === `aws-cdk-${version}.zip`) {
+						acc = asset.url;
+					}
+					return acc;
+				}, null);
+			},
+		);
 		const source = await download(url);
 		const packages = await getPackages(source);
 		const { stable, experimental, deprecated, unknown } = Object.values(packages).reduce(
@@ -190,7 +191,7 @@ export async function main(): Promise<void> {
 		setOutput("dependencies", output);
 		exportVariable("dependencies", output);
 	} catch (err) {
-		log(err);
+		info(err);
 		setFailed(`Action failed with error ${err}`);
 	}
 }

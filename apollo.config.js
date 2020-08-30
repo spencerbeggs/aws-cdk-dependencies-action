@@ -5,14 +5,13 @@ module.exports = {
 	client: {
 		service: {
 			name: "github",
-			includes: ["src/**", "vendor/**"],
+			includes: ["src/graphql/**", "vendor/**"],
+			url: "https://api.github.com/graphql",
 			localSchemaFile: "node_modules/@octokit/graphql-schema/schema.graphql",
-			// url: "https://api.github.com/graphql",
-			// headers: {
-			// 	// eslint-disable-next-line no-undef
-			// 	Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
-			// },
-			tsFileExtension: "d.ts",
+			headers: {
+				// eslint-disable-next-line no-undef
+				Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
+			},
 		},
 	},
 };
