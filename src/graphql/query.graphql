@@ -1,0 +1,15 @@
+query GetReleaseByTag($tagName: String!) {
+    repository(owner: "aws", name: "aws-cdk") {
+        release(tagName: $tagName) {
+            releaseAssets(first: 100) {
+                edges {
+                    node {
+                        id
+                        name
+                        url
+                    }
+                }
+            }
+        }
+    }
+}

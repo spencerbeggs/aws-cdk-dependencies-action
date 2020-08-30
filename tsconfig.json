@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES2020",
-		"module": "CommonJS",
+		"module": "ESNext",
 		"moduleResolution": "node",
 		"lib": ["ESNext"],
 		"esModuleInterop": true,
@@ -13,9 +13,9 @@
 		"alwaysStrict": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
+		"allowJs": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": false,
-		"allowJs": true,
 		"strictPropertyInitialization": false,
 		"pretty": false,
 		"resolveJsonModule": true,

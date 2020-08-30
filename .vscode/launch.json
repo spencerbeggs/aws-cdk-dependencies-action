@@ -9,9 +9,11 @@
 				"NODE_ENV": "development"
 			},
 			"program": "${workspaceRoot}/dist/index.mjs",
+			"cwd": "${workspaceRoot}",
 			"envFile": "${workspaceRoot}/.env",
 			"outputCapture": "console",
-			"internalConsoleOptions": "openOnSessionStart"
+			"internalConsoleOptions": "openOnSessionStart",
+			"preLaunchTask": "npm:dev",
 		},
 		{
 			"name": "container:bootstrap",

@@ -1,0 +1,9 @@
+overwrite: true
+schema: "node_modules/@octokit/graphql-schema/scema.graphql"
+documents: "src/graphql/**"
+generates:
+  src/generated/index.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typed-document-node

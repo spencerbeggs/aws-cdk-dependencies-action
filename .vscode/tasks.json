@@ -6,6 +6,15 @@
 	},
 	"tasks": [
 		{
+			"label": "npm:dev",
+			"type": "npm",
+			"script": "rollup --waitForBundleInput",
+			"dependsOn": [
+				"npm:clean"
+			],
+			"dependsOrder": "sequence"
+		},
+		{
 			"label": "docker:container:stop",
 			"type": "shell",
 			"command": "docker",
@@ -83,8 +92,8 @@
 		},
 		{
 			"label": "npm:package",
-			"type": "npm",
-			"script": "ts-node lib/package.ts",
+			"type": "shell",
+			"command": "node lib/package.cjs",
 			"presentation": {
 				"echo": false,
 				"showReuseMessage": false,
