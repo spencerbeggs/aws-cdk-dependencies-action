@@ -1,4 +1,4 @@
-import { debug, endGroup, info, startGroup, warning } from "@actions/core";
+import { debug, endGroup, group, info, startGroup, warning } from "@actions/core";
 import { createWriteStream, promises } from "fs";
 import { ensureDir, pathExists } from "fs-extra";
 import gunzip from "gunzip-maybe";
@@ -56,9 +56,9 @@ export const getUrl = async function (release: string): Promise<string> {
 		},
 	});
 	const assets = repository?.release?.releaseAssets?.edges.map((edge) => edge.node);
-	startGroup(`found ${assets.length} assets:`);
-	assets.forEach(({ name }) => info(`   — ${name}`));
-	endGroup();
+	await group(`found ${assets.length} assets:`, async () => {
+		return assets.forEach(({ name }) => info(`   — ${name}`));
+	});
 	return assets.reduce((acc: string, asset): string => {
 		if (asset.name === `aws-cdk-${version}.zip`) {
 			acc = asset.url;
