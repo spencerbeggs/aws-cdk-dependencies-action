@@ -56,8 +56,9 @@ export const getUrl = async function (release: string): Promise<string> {
 		},
 	});
 	const assets = repository?.release?.releaseAssets?.edges.map((edge) => edge.node);
-	info(`found ${assets.length} assets:`);
+	startGroup(`found ${assets.length} assets:`);
 	assets.forEach(({ name }) => info(`   — ${name}`));
+	endGroup();
 	return assets.reduce((acc: string, asset): string => {
 		if (asset.name === `aws-cdk-${version}.zip`) {
 			acc = asset.url;
@@ -81,7 +82,7 @@ export const downloadSource = async function (url: string): Promise<string> {
 	return new Promise<string>((resolve) => {
 		message.pipe(stream).on("close", () => {
 			stream.end();
-			debug(`downloaded source to: ${filePath}`);
+			info(`downloaded source to: ${filePath}`);
 			resolve(filePath);
 		});
 	});
@@ -206,83 +207,3 @@ export const parsePackages = async function (packages: CDKPackage[]): Promise<De
 		return acc;
 	}, {} as DependencyGraph);
 };
-
-export async function main(): Promise<void> {
-	// try {
-	// 	const release = process.env.RELEASE ?? getInput("release");
-	// 	const version = clean(release);
-	// 	const url = await group(`Getting download URL for AWS CDK release ${release}`, async function (
-	// 		release: string,
-	// 	): Promise<string> {
-	// 		const version = clean(release);
-	// 		const {
-	// 			data: { repository },
-	// 		} = await client.query<GetReleaseByTagQuery>({
-	// 			query: GetReleaseByTagDocument,
-	// 			variables: {
-	// 				tagName: release,
-	// 			},
-	// 		});
-	// 		const assets = repository?.release?.releaseAssets?.edges.map((edge) => edge.node);
-	// 		info(`found ${assets.length} assets:`);
-	// 		assets.forEach(({ name }) => info(`   — ${name}`));
-	// 		return assets.reduce((acc: string, asset): string => {
-	// 			if (asset.name === `aws-cdk-${version}.zip`) {
-	// 				acc = asset.url;
-	// 			}
-	// 			return acc;
-	// 		}, null);
-	// 	});
-	// 	const source = await download(url);
-	// 	const packages = await getPackages(source);
-	// 	const { stable, experimental, deprecated, unknown } = Object.values(packages).reduce(
-	// 		(acc, pkg) => {
-	// 			switch (pkg.stability) {
-	// 				case "stable":
-	// 					acc.stable.push(pkg);
-	// 					break;
-	// 				case "experimental":
-	// 					acc.experimental.push(pkg);
-	// 					break;
-	// 				case "deprecated":
-	// 					acc.deprecated.push(pkg);
-	// 					break;
-	// 				default:
-	// 					acc.unknown.push(pkg);
-	// 					break;
-	// 			}
-	// 			return acc;
-	// 		},
-	// 		{ stable: [], experimental: [], deprecated: [], unknown: [] },
-	// 	);
-	// 	debug(`  — stable: ${stable.length}`);
-	// 	debug(`  — experimental: ${experimental.length}`);
-	// 	debug(`  — deprecated: ${deprecated.length}`);
-	// 	debug(`  — unknown: ${unknown.length}`);
-	// 	const output = [stable, experimental].flat().reduce((acc, { name, version, peerDependencies = {} }): Record<
-	// 		string,
-	// 		string
-	// 	> => {
-	// 		const current = acc[name];
-	// 		if (current && current !== version) {
-	// 			version = normalizeVersions(name, current, version);
-	// 		}
-	// 		acc[name] = version;
-	// 		Object.entries(peerDependencies).forEach(([peerName, peerVersion]) => {
-	// 			const currentPeer = acc[peerName];
-	// 			if (currentPeer && currentPeer !== peerVersion) {
-	// 				peerVersion = normalizeVersions(name, currentPeer, peerVersion as string);
-	// 			}
-	// 			acc[peerName] = peerVersion;
-	// 		});
-	// 		acc = Object.fromEntries(Object.entries(acc).sort());
-	// 		return acc;
-	// 	}, {});
-	// 	debug(output);
-	// 	setOutput("dependencies", output);
-	// 	exportVariable("dependencies", output);
-	// } catch (err) {
-	// 	info(err);
-	// 	setFailed(`Action failed with error ${err}`);
-	// }
-}
