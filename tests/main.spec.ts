@@ -1,4 +1,4 @@
-import { main } from "../src/main";
+import { main } from "../src/index";
 
 describe("main()", (): void => {
 	it("rejects if you are not logged in", async () => {

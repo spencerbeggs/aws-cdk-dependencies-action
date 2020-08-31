@@ -1,7 +1,7 @@
 import { exportVariable, getInput, group, info, setFailed, setOutput } from "@actions/core";
 import { downloadSource, getPackages, getUrl, parsePackages } from "./main";
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
 	try {
 		const release = process.env.RELEASE ?? getInput("release");
 		const url = await group(`Getting download URL for AWS CDK release ${release}`, getUrl.bind(null, release));
