@@ -144,19 +144,25 @@
 		{
 			"label": "docker:container:run",
 			"type": "docker-run",
-			"isBackground": true,
+			"node": {
+				"enableDebugging": true
+		  	},
 			"dockerRun": {
 				"containerName": "aws-cdk-dependencies-action",
 				"image": "spencerbeggs/aws-cdk-dependencies-action:run",
+				"command": "node /app/index.mjs --inspect=0.0.0.0:9229",
 				"envFiles": [
 					"${workspaceRoot}/.env.test"
 				],
-				"ports": [
-					{
-						"containerPort": 9229,
-						"hostPort": 9229
-					}
-				],
+				"node": {
+					"enableDebugging": true,
+					"inspectMode": "break"
+				},
+				"portsPublishAll": true,
+				"ports": [{
+					"containerPort": 9229,
+					"hostPort": 9229
+				}],
 				"volumes": [{
 					"localPath": "${workspaceRoot}/tmp",
 					"containerPath": "/tmp",

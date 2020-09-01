@@ -1,4 +1,4 @@
-import { debug, endGroup, group, info, startGroup, warning } from "@actions/core";
+import { endGroup, info, startGroup, warning } from "@actions/core";
 import { createWriteStream, promises } from "fs";
 import { ensureDir, pathExists } from "fs-extra";
 import gunzip from "gunzip-maybe";
@@ -56,9 +56,7 @@ export const getUrl = async function (release: string): Promise<string> {
 		},
 	});
 	const assets = repository?.release?.releaseAssets?.edges.map((edge) => edge.node);
-	await group(`found ${assets.length} assets:`, async () => {
-		return assets.forEach(({ name }) => info(`   — ${name}`));
-	});
+	assets.forEach((asset) => info(`${asset.name}:`));
 	return assets.reduce((acc: string, asset): string => {
 		if (asset.name === `aws-cdk-${version}.zip`) {
 			acc = asset.url;
@@ -68,6 +66,7 @@ export const getUrl = async function (release: string): Promise<string> {
 };
 
 export const downloadSource = async function (url: string): Promise<string> {
+	info(`downloading from: ${url}`);
 	const filename = getFilename(url);
 	const dirPath = join(process.cwd(), "tmp");
 	const filePath = join(process.cwd(), `tmp/${filename}`);
@@ -91,7 +90,7 @@ export const downloadSource = async function (url: string): Promise<string> {
 export const getPackages = async function (filePath: string): Promise<CDKPackage[]> {
 	const data = await promises.readFile(filePath);
 	const zip = await loadAsync(data);
-	return Promise.all(
+	const packages = await Promise.all(
 		zip
 			.folder("js")
 			.filter((relativePath) => {
@@ -129,10 +128,13 @@ export const getPackages = async function (filePath: string): Promise<CDKPackage
 						.on("finish", () => resolve(pkgs));
 				});
 			}),
-	).then((arr) => {
-		const packages = [].concat([], ...arr).filter((item) => Boolean(item));
-		debug(`parsed ${Object.values(packages).length} packages`);
-		return Promise.resolve(packages);
+	);
+	return orderBy(
+		[].concat([], ...packages).filter((pkg) => Boolean(pkg)),
+		"name",
+	).map((pkg) => {
+		info(JSON.stringify(pkg, null, "\t"));
+		return pkg;
 	});
 };
 

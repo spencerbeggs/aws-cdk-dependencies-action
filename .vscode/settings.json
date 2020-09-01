@@ -29,6 +29,6 @@
 	"typescript.referencesCodeLens.enabled": true,
 	"sort-imports.on-save": false,
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.preferences.importModuleSpecifierEnding": ".js",
+	"apollographql.trace.server": "messages",
 	"aws.profile": "savvy"
 }
