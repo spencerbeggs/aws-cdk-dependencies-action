@@ -103,9 +103,7 @@ export const getPackages = async function (filePath: string): Promise<CDKPackage
 						.pipe(gunzip())
 						.pipe(extract())
 						.on("entry", function (header, stream, next) {
-							stream.on("end", function () {
-								next(); // ready for next entry
-							});
+							stream.on("end", next);
 							if (header.name === "package/package.json") {
 								const data = [];
 								stream
@@ -116,11 +114,11 @@ export const getPackages = async function (filePath: string): Promise<CDKPackage
 											const pkg: CDKPackage = JSON.parse(json);
 											pkgs.push(pkg);
 										} catch (err) {
-											warning(err.message);
+											warning(err);
 										}
 									})
 									.on("error", (err) => {
-										warning(err.message);
+										warning(err);
 									});
 							}
 							stream.resume();
@@ -180,16 +178,16 @@ export const parsePackages = async function (packages: CDKPackage[]): Promise<De
 		},
 		{ stable: [], experimental: [], deprecated: [], unknown: [] } as PackageTypes,
 	);
-	startGroup(`  — stable ${stable.length}:`);
+	startGroup(`${stable.length} stable packages:`);
 	stable.forEach((pkg) => info(pkg.name));
 	endGroup();
-	startGroup(`  — experimental ${experimental.length}:`);
+	startGroup(`${experimental.length} experimental packages:`);
 	experimental.forEach((pkg) => info(pkg.name));
 	endGroup();
-	startGroup(`  — deprecated ${deprecated.length}:`);
+	startGroup(`${deprecated.length} deprecated packages:`);
 	deprecated.forEach((pkg) => info(pkg.name));
 	endGroup();
-	startGroup(`  — unknown ${unknown.length}:`);
+	startGroup(`${unknown.length} unknown packages:`);
 	unknown.forEach((pkg) => info(pkg.name));
 	endGroup();
 	return [stable, experimental].flat().reduce((acc, { name, version, peerDependencies = {} }): DependencyGraph => {
