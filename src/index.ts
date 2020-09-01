@@ -4,10 +4,8 @@ import { downloadSource, getPackages, getUrl, parsePackages } from "./main";
 export async function main(): Promise<void> {
 	try {
 		const release = process.env.RELEASE ?? getInput("release");
-		const url = await group(`Getting download URL for AWS CDK release ${release}`, getUrl.bind(null, release));
-		info(url);
-		const source = await group(`Downloading ${url}`, downloadSource.bind(null, url));
-		info(source);
+		const url = await group(`Getting release assets for AWS CDK ${release}`, getUrl.bind(null, release));
+		const source = await group("Downloading JavaScript source bundle", downloadSource.bind(null, url));
 		const packages = await group(`Getting packages from ${source}`, getPackages.bind(null, source));
 		const output = await group(`Parsing ${packages.length} packages`, parsePackages.bind(null, packages));
 		setOutput("dependencies", output);

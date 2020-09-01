@@ -38,7 +38,10 @@
 			"request": "launch",
 			"containerName": "aws-cdk-dependencies-action",
 			"preLaunchTask": "container:reboot",
-			"platform": "node"
+			"platform": "node",
+			"node": {
+				"remoteRoot": "/app"
+			}
 		}
 	]
 }
