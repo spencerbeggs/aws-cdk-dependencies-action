@@ -22,7 +22,7 @@
 		"fs-extra": "^9.0.0",
 		"graphql": "^15.3.0",
 		"gunzip-maybe": "^1.4.2",
-		"jszip": "^3.5.0",
+		"jszip": "^3.7.0",
 		"react": "^16.13.1",
 		"semver": "^7.3.2",
 		"subscriptions-transport-ws": "^0.9.18",
